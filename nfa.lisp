@@ -39,8 +39,8 @@
       (let ((internal-initial (gen-state-name))
             (internal-final (gen-state-name)))
         (append (list (list initial internal-initial)
-                    (list internal-final final))
-              (re-compile (car RE-list) internal-initial internal-final)))))
+                      (list internal-final final))
+                (re-compile (car RE-list) internal-initial internal-final)))))
 
 (defun re-c-plus (RE initial final)
   (let ((internal-initial (gen-state-name))
@@ -53,6 +53,24 @@
 (defun re-c-star (RE initial final)
   (cons (list initial final)
         (re-c-plus RE initial final)))
+
+(defun x-func (NFA state input)
+  (or (and (eql state (second (third NFA))) (not input))
+      (y-func NFA state (second NFA) input)))
+      
+;;OTTIMIZZARE / Stile (unire gli or in unica clausola finale)
+(defun y-func (NFA state transitions input)
+  (if transitions
+      (let ((curr-transition (car transitions)))
+        (if (eql (first curr-transition) state)
+            (if (third curr-transition)
+                (if (equal (second curr-transition) (car input))
+                    (or (x-func NFA (third curr-transition) (cdr input))
+                        (y-func NFA state (cdr transitions) input)))
+                (or (x-func NFA (second curr-transition) input)
+                    (y-func NFA state (cdr transitions) input)))
+            (y-func NFA state (cdr transitions) input))))) ;;cosa succede quando lista vuota
+
 
 
 ;; (defun is-operator-p (x)) 
