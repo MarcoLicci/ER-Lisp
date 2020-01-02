@@ -1,18 +1,14 @@
-;;REMEMBER RAIL RECURSION OPTIMIZATION
-;;Checkout google guidelines
+;; TODO
+;; Guidelines Antoniotti e google
+;; Testare su Lispworks
+;; Commenti e README
+;; Rimuovi ultimi TODO (gen-state...)
 
-;; TESTARE su LISPWORKS
-
-;; cosa succede quando lista termina per null <===
-;; ^^^ verifica corretto uso dei cadr (invece di cdr)
-
-;;STILE rivedi nomi input per funzioni standard
-
-(defun nfa-test (FA Input)
+(defun nfa-test (FA input)
   (if (is-nfa-p FA)
-      (nfa-start FA Input)
-      ;; THROW ERROR HERE!!! (testo o vero errore?)
-      ))
+      (if (listp input)
+          (nfa-accept FA (car FA) input))
+      (error "Error: ~S is not a Finite State Automata. " FA)))
 
 (defun nfa-regexp-comp (RE)
   (if (is-regexp RE)
@@ -53,8 +49,6 @@
   (and (is-regexp (car RE-list))
        (or (null (cdr RE-list))
            (is-regexp-list-p (cdr RE-list)))))
-
-;; TODO restructure NFA and NFA verification
 
 (defun re-compile (RE initial final)
   (if (not (listp RE))
@@ -106,40 +100,10 @@
   (cons (list initial final)
         (re-c-plus RE initial final)))
 
-;; verifica comportamento con sym che siano sexp
-
-(defun nfa-start (NFA input)
-  (nfa-accept NFA (car NFA) input))
 
 (defun nfa-accept (NFA state input)
   (or (and (eql state (third NFA)) (not input))
       (nfa-transition NFA state (second NFA) input)))
-      
-;;OTTIMIZZARE / Stile (unire gli or in unica clausola finale)
-;; basato su lazy eval / short circuit
-;; (defun y-func (NFA state transitions input)
-;;   (if transitions
-;;       (let ((curr-transition (car transitions)))
-;;         (if (eql (first curr-transition) state)
-;;             (if (third curr-transition)
-;;                 (if (equal (second curr-transition) (car input))
-;;                     (or (x-func NFA (third curr-transition) (cdr input))
-;;                         (y-func NFA state (cdr transitions) input)))
-;;                 (or (x-func NFA (second curr-transition) input)
-;;                     (y-func NFA state (cdr transitions) input)))
-;;             (y-func NFA state (cdr transitions) input))))) ;;cosa succede quando lista vuota
-
-
-;; (defun y-func-LE (NFA state transitions input)
-;;   (and transitions
-;;        (let ((curr-transition (car transitions)))
-;;          (or (and (eql (first curr-transition) state)
-;;                   (or (and (third curr-transition)
-;;                            (equal (second curr-transition) (car input))
-;;                            (x-func NFA (third curr-transition) (cdr input)))
-;;                       (x-func NFA (second curr-transition) input)))
-;;              (y-func NFA state (cdr transitions) input)
-;;              ))))
 
 
 (defun nfa-transition (NFA state transitions input)
@@ -150,9 +114,5 @@
                     (if (equal (second curr-transition) (car input))
                         (nfa-accept NFA (third curr-transition) (cdr input)))
                     (nfa-accept NFA (second curr-transition) input))))
-          (nfa-transition NFA state (cdr transitions) input)))) ;;cosa succede quando lista vuota
+          (nfa-transition NFA state (cdr transitions) input))))
 
-;; (defun is-operator-p (x)) 
-
-;;Naming convention?
-;; (defun is-symbol-p (x) (or (not (listp x)) ()))
