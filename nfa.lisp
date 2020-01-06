@@ -69,7 +69,9 @@
   (gensym))
 
 (defun re-c-sym (RE initial final)
-  (list (list initial RE final)))
+  (if (equal RE 'epsilon)
+      (list (list initial final))
+      (list (list initial RE final))))
 
 (defun re-c-seq (RE-list initial final)
   (if (cdr RE-list)
