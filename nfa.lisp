@@ -7,7 +7,7 @@
 (defun nfa-test (FA input)
   (if (is-nfa-p FA)
       (if (listp input)
-          (nfa-accept FA (car FA) input))
+          (nfa-accept FA (car FA) nil input))
       (error "Error: ~S is not a Finite State Automata. " FA)))
 
 (defun nfa-regexp-comp (RE)
@@ -101,18 +101,23 @@
         (re-c-plus RE initial final)))
 
 
-(defun nfa-accept (NFA state input)
+(defun nfa-accept (NFA state e-visit input)
   (or (and (eql state (third NFA)) (not input))
-      (nfa-transition NFA state (second NFA) input)))
+      (nfa-transition NFA state (second NFA) e-visit input)))
 
 
-(defun nfa-transition (NFA state transitions input)
+(defun nfa-transition (NFA state transitions e-visit input)
   (if transitions
       (or (let ((curr-transition (car transitions)))
             (if (eql (first curr-transition) state)
                 (if (third curr-transition)
                     (if (equal (second curr-transition) (car input))
-                        (nfa-accept NFA (third curr-transition) (cdr input)))
-                    (nfa-accept NFA (second curr-transition) input))))
-          (nfa-transition NFA state (cdr transitions) input))))
+                        (nfa-accept
+                         NFA (third curr-transition) nil (cdr input)))
+                    (if (not (member (second curr-transition) e-visit))
+                        (nfa-accept
+                         NFA (second curr-transition)
+                         (cons (second curr-transition) e-visit)
+                         input)))))
+          (nfa-transition NFA state (cdr transitions) e-visit input))))
 
