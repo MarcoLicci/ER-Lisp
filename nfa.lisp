@@ -7,7 +7,7 @@
 (defun nfa-test (FA input)
   (if (is-nfa-p FA)
       (if (listp input)
-          (nfa-accept FA (car FA) nil input))
+          (nfa-accept FA (car FA) input nil))
       (error "Error: ~S is not a Finite State Automata. " FA)))
 
 (defun nfa-regexp-comp (RE)
@@ -75,51 +75,52 @@
 
 (defun re-c-seq (RE-list initial final)
   (if (cdr RE-list)
-      (let ((internal-final (gen-state-name)))
-        (append (re-compile (car RE-list) initial internal-final)
-                (re-c-seq (cdr RE-list) internal-final final)))
+      (let ((int-final (gen-state-name)))
+        (append (re-compile (car RE-list) initial int-final)
+                (re-c-seq (cdr RE-list) int-final final)))
       (re-compile (car RE-list) initial final)))
 
 (defun re-c-or (RE-list initial final)
   (if (cdr RE-list)
       (append (re-c-or (list (car RE-list)) initial final)
               (re-c-or (cdr RE-list) initial final))
-      (let ((internal-initial (gen-state-name))
-            (internal-final (gen-state-name)))
-        (append (list (list initial internal-initial)
-                      (list internal-final final))
-                (re-compile (car RE-list) internal-initial internal-final)))))
+      (let ((int-initial (gen-state-name))
+            (int-final (gen-state-name)))
+        (append (list (list initial int-initial)
+                      (list int-final final))
+                (re-compile (car RE-list) int-initial int-final)))))
 
 (defun re-c-plus (RE initial final)
-  (let ((internal-initial (gen-state-name))
-        (internal-final (gen-state-name)))
-    (append (list (list initial internal-initial)
-                  (list internal-final internal-initial)
-                  (list internal-final final))
-            (re-compile RE internal-initial internal-final))))
+  (let ((int-initial (gen-state-name))
+        (int-final (gen-state-name)))
+    (append (list (list initial int-initial)
+                  (list int-final int-initial)
+                  (list int-final final))
+            (re-compile RE int-initial int-final))))
 
 (defun re-c-star (RE initial final)
   (cons (list initial final)
         (re-c-plus RE initial final)))
 
 
-(defun nfa-accept (NFA state e-visit input)
-  (or (and (eql state (third NFA)) (not input))
-      (nfa-transition NFA state (second NFA) e-visit input)))
+(defun nfa-accept (NFA state input visited)
+  (or (and (eql state (third NFA)) (null input))
+      (nfa-accept-transitions
+       NFA state (second NFA) input visited)))
 
-
-(defun nfa-transition (NFA state transitions e-visit input)
+(defun nfa-accept-transitions (NFA state transitions input visited)
   (if transitions
-      (or (let ((curr-transition (car transitions)))
-            (if (eql (first curr-transition) state)
-                (if (third curr-transition)
-                    (if (equal (second curr-transition) (car input))
+      (or (let ((tr (car transitions)))
+            (if (eql (first tr) state)
+                (if (third tr)
+                    (if (equal (second tr) (first input))
                         (nfa-accept
-                         NFA (third curr-transition) nil (cdr input)))
-                    (if (not (member (second curr-transition) e-visit))
+                         NFA (third tr) (cdr input) nil))
+                    (if (not (member (second tr) visited))
                         (nfa-accept
-                         NFA (second curr-transition)
-                         (cons (second curr-transition) e-visit)
-                         input)))))
-          (nfa-transition NFA state (cdr transitions) e-visit input))))
+                         NFA (second tr)
+                         input
+                         (cons (second tr) visited))))))
+          (nfa-accept-transitions
+           NFA state (cdr transitions) input visited))))
 
