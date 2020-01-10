@@ -2,7 +2,7 @@
 
 ;;;; Funzioni di validazione
 
-;; Verifica se la lista fornita e' una  espressione regolare,
+;; Verifica se la lista fornita e' una espressione regolare,
 ;; per gli operatori or seq e' richiesto un numbero di argomenti
 ;; maggiore di 0, per star e plus esattamente uno.
 (defun is-regexp (RE)
@@ -151,11 +151,11 @@
 
 ;; Se sono presenti transizioni, consuma la prima verificando
 ;; che il relativo stato iniziale corrisponda allo stato attuale,
-;; in caso contrario procede ricorsivamente sul resto della lista.
-;; Se la transizione considerata e' una epsilon-transizione,
-;; la funzione controlla che lo stato finale non sia gia' visitato,
-;; se non e' una epsilon-transizione confronta il simbolo della
-;; transizione con il primo in input. In caso di fallimento
+;; in caso contrario la ignora e procede ricorsivamente sul 
+;; resto della lista. Se la transizione considerata e' una 
+;; epsilon-transizione, la funzione controlla che lo stato finale
+;; non sia gia' visitato, se non e' una epsilon-transizione confronta
+;; il simbolo della transizione con il primo in input. In caso di fallimento
 ;; della funzione nfa-accept, nfa-accept-transitions prova 
 ;; ricorsivamente le rimanenti
 (defun nfa-accept-transitions (NFA state transitions input visited)
