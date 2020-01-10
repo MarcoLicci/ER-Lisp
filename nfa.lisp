@@ -1,10 +1,6 @@
-;; TODO
-;; Guidelines Antoniotti e google
-;; Testare su Lispworks
-;; Commenti e README
-;; Rimuovi ultimi TODO (gen-state...)
+;; Licci Marco 844774
 
-;;; Funzioni di validazione
+;;;; Funzioni di validazione
 
 ;; Verifica se la lista fornita e' una  espressione regolare,
 ;; per gli operatori or seq e' richiesto un numbero di argomenti
@@ -39,10 +35,10 @@
                 (atom (second x))))
        (atom (first x))))
 
-;;; Compilazione
-;;;
-;;; Funzioni di compilazione basate
-;;; sull'algoritmo di Thompson
+;;;; Compilazione
+;;;;
+;;;; Funzioni di compilazione basate
+;;;; sull'algoritmo di Thompson
 
 ;; Compila un'espressione regolare in un automa NFA,
 ;; cioe' una lista di lunghezza 3 composta da:
@@ -133,10 +129,10 @@
         (re-c-plus RE initial final)))
 
 
-;;; Test
+;;;; Test
 
 ;; Ritorna T se NFA e' valido e l'input e' una lista accettata
-;; da nfa-accept, lancia un errore se NFA non e' un automa
+;; da nfa-accept, segnala un errore se NFA non e' un automa
 (defun nfa-test (FA input)
   (if (is-nfa-p FA)
       (if (listp input)
@@ -154,15 +150,14 @@
        NFA state (second NFA) input visited)))
 
 ;; Se sono presenti transizioni, consuma la prima verificando
-;; che il relativo stato iniziale corrisponda allo stato attuale
-;; altrimenti la funzione procede ricorsivamente sul resto della lista.
-;; Se la transizione considerata e' una epsilon-transizione, controlla
-;; che lo stato finale non sia gia' visitato, condizione necessaria per
-;; gestire i cammini ciclici dell'NFA ed infine chiama nfa-accept passando
-;; il nuovo stato. Per le transizioni non epsilon e' sufficiente confrontare
-;; il simbolo della transizione con il primo in input. In caso di fallimento
-;; della funzione nfa-accept, nfa-accept-transitions prova ricorsicamente
-;; le rimanenti
+;; che il relativo stato iniziale corrisponda allo stato attuale,
+;; in caso contrario procede ricorsivamente sul resto della lista.
+;; Se la transizione considerata e' una epsilon-transizione,
+;; la funzione controlla che lo stato finale non sia gia' visitato,
+;; se non e' una epsilon-transizione confronta il simbolo della
+;; transizione con il primo in input. In caso di fallimento
+;; della funzione nfa-accept, nfa-accept-transitions prova 
+;; ricorsivamente le rimanenti
 (defun nfa-accept-transitions (NFA state transitions input visited)
   (when transitions
     (or (let ((tr (car transitions)))
